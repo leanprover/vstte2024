@@ -239,35 +239,35 @@ theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
         assumption
 
 /--
-Run a program, with the depth of the recursive calls limited by the `Nat` parameter. Returns `none`
+Run a program, with the number of loop iterations limited by the `Nat` parameter. Returns `none`
 if the program doesn't terminate fast enough or if some other problem means the result is undefined
 (e.g. division by zero).
  -/
-def run (σ : Env) (s : Stmt) : Nat → Option Env
-  | 0 => none
-  | n + 1 =>
-    match s with
-    | imp {skip;} =>
-      some σ
-    | imp {~s1 ~s2} => do
+def run (σ : Env) (s : Stmt) (n : Nat) : Option Env :=
+  match s with
+  | imp {skip;} =>
+    some σ
+  | imp {~s1 ~s2} => do
+    let σ' ← run σ s1 n
+    run σ' s2 n
+  | imp {~x := ~e;} => do
+    let v ← e.eval σ
+    pure (σ.set x v)
+  | imp {if (~c) {~s1} else {~s2}} => do
+    let v ← c.eval σ
+    if v = 0 then
+      run σ s2 n
+    else
+      run σ s1 n
+  | imp {while (~c) {~s1}} => do
+    let n + 1 := n
+      | none
+    let v ← c.eval σ
+    if v = 0 then
+      pure σ
+    else
       let σ' ← run σ s1 n
-      run σ' s2 n
-    | imp {~x := ~e;} => do
-      let v ← e.eval σ
-      pure (σ.set x v)
-    | imp {if (~c) {~s1} else {~s2}} => do
-      let v ← c.eval σ
-      if v = 0 then
-        run σ s2 n
-      else
-        run σ s1 n
-    | imp {while (~c) {~s1}} => do
-      let v ← c.eval σ
-      if v = 0 then
-        pure σ
-      else
-        let σ' ← run σ s1 n
-        run σ' (imp {while (~c) {~s1}}) n
+      run σ' (imp {while (~c) {~s1}}) n
 
 /-- Helper lemma for the next proof -/
 theorem bind_eq_some : (Option.bind x f = some y) ↔ (∃ a, x = some a ∧ f a = some y) := by
@@ -289,18 +289,18 @@ confidence.
 theorem run_some_implies_big_step : run σ s n = some σ' → BigStep σ s σ' := by
   intro term
   induction σ, s, n using run.induct generalizing σ' <;> simp_all [run, bind_eq_some]
-  case case3 σ n s1 s2 ih1 ih2 =>
+  case case2 σ n s1 s2 ih1 ih2 =>
     let ⟨σ'', run_s1, run_s2⟩ := term
     -- Right nesting needed to run the first `trivial` before the second `apply_assumption`, which solves a metavariable
     constructor <;> (apply_assumption <;> trivial)
-  case case4 =>
+  case case3 =>
     let ⟨v, has_val, next_env⟩ := term
     subst_eqs
     constructor <;> trivial
-  case case5 ih1 ih2 =>
+  case case4 ih1 ih2 =>
     let ⟨v, has_val, next_env⟩ := term
     split at next_env <;> simp_all [BigStep.ifTrue, BigStep.ifFalse]
-  case case6 ih1 ih2 =>
+  case case5 ih1 ih2 =>
     let ⟨v, has_val, next_env⟩ := term
     split at next_env
     . simp_all [BigStep.whileFalse]
