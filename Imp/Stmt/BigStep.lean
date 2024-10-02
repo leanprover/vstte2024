@@ -90,6 +90,9 @@ example : ∃σ', BigStep (Env.init 0 |>.set "x" x |>.set "y" y) swap σ' ∧ σ
 `min` computes the minimum of its inputs.
 -/
 example : ∃σ', BigStep (Env.init 0 |>.set "x" x |>.set "y" y) min σ' ∧ if x < y then σ'.get "min" = x else σ'.get "min" = y := by
+  -- This takes the “wrong path” at if:
+  -- repeat' constructor
+  -- simp
   unfold min
   by_cases h : x < y
   . apply Exists.intro; constructor
@@ -116,12 +119,11 @@ theorem infinite_loop : ¬ BigStep σ loop σ' := by
   generalize h' : loop = l
   intro h
   induction h <;> try (simp [loop, *] at *; done)
-  case whileTrue =>
-    simp [*]
-  case whileFalse cFalse =>
-    unfold loop at h'
-    cases h'
-    simp [Expr.eval] at cFalse
+  case whileTrue ih =>
+    exact ih h'
+  case whileFalse σ c body cFalse =>
+    have : c = (expr { 1 }) := by simp_all [loop]
+    simp [Expr.eval, this] at cFalse
 
 /-- Optimizing a program doesn't change its meaning -/
 theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
