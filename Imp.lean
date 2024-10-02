@@ -69,5 +69,5 @@ def test_popcount (x : BitVec 32) : Bool :=
 
 
 theorem popCount_correct : test_popcount x := by
-  simp [test_popcount, run, popcount, Expr.eval, Expr.BinOp.apply, Env.get, Env.set, Value, pop_spec, pop_spec.go]
+  simp! [test_popcount, popcount, pop_spec, Stmt.run]
   bv_decide
