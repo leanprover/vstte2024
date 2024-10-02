@@ -5,60 +5,7 @@ import Imp.Stmt.Optimize
 
 namespace Imp
 
-/--
-Truthiness: the result of evaluating an expression is "truthy" if it's defined and non-zero.
--/
-def Truthy (v : Option Value) : Prop :=
-  match v with
-  | some v => v ≠ 0
-  | none => False
-
-instance : Decidable (Truthy v) :=
-  match v with
-  | some v =>
-    if h : v ≠ 0 then .isTrue h else .isFalse h
-  | none => .isFalse id
-
-@[simp]
-theorem Truthy.some_nonzero : Truthy (some v) = (v ≠ 0) := by
-  simp [Truthy]
-
-@[simp]
-theorem Truthy.not_none : Truthy none = False := by
-  simp [Truthy]
-
-@[simp]
-theorem Truthy.eval_const : Truthy (Expr.eval σ (.const v)) = (v ≠ 0) := by
-  simp [Truthy, Expr.eval]
-
-/--
-Falsiness: the result of evaluating an expression is "falsy" if it's 0
--/
-def Falsy (v : Option Value) : Prop := v = some 0
-
-@[simp]
-theorem Falsy.eval_const : Falsy (Expr.eval σ (.const v)) = (v = 0) := by
-  simp [Falsy, Expr.eval]
-
-@[simp]
-theorem Falsy.some_zero : Falsy (some v) = (v = 0) := by
-  simp [Falsy]
-
-@[simp]
-theorem Falsy.not_none : Falsy none = False := by
-  simp [Falsy]
-
-
-instance : Decidable (Falsy v) := inferInstanceAs (Decidable (v = some 0))
-
-theorem Truthy.not_falsy : Truthy v → ¬Falsy v := by
-  intro h1 h2
-  simp [Truthy, Falsy] at *
-  cases v <;> simp at * <;> contradiction
-
-
 namespace Stmt
-
 
 /--
 Big-step semantics: `BigStep σ s σ'` means that running the program `s` in the starting state `σ` is
