@@ -74,18 +74,22 @@ inductive BigStep : Env → Stmt → Env → Prop where
     e.eval σ = some v →
     BigStep σ (imp {~x := ~e;}) (σ.set x v)
   | ifTrue :
-    Truthy (c.eval σ) → BigStep σ s1 σ' →
+    c.eval σ = some v →
+    v ≠ 0 →
+    BigStep σ s1 σ' →
     BigStep σ (imp {if (~c) {~s1} else {~s2}}) σ'
   | ifFalse :
-    Falsy (c.eval σ) → BigStep σ s2 σ' →
+    c.eval σ = some 0 →
+    BigStep σ s2 σ' →
     BigStep σ (imp {if (~c) {~s1} else {~s2}}) σ'
   | whileTrue :
-    Truthy (c.eval σ) →
+    c.eval σ = some v →
+    v ≠ 0 →
     BigStep σ body σ' →
     BigStep σ' (imp {while (~c) {~body}}) σ'' →
     BigStep σ (imp {while (~c) {~body}}) σ''
   | whileFalse :
-    Falsy (c.eval σ) →
+    c.eval σ = some 0 →
     BigStep σ (imp {while (~c) {~body}}) σ
 
 attribute [simp] BigStep.skip
@@ -144,6 +148,8 @@ example : ∃σ', BigStep (Env.init 0 |>.set "x" x |>.set "y" y) min σ' ∧ if 
   . apply Exists.intro; constructor
     . apply BigStep.ifTrue
       . simp [Expr.eval, Expr.BinOp.apply, Env.get, Env.set, *]
+        rfl
+      . simp
       . constructor; simp [Expr.eval, Env.get, Env.set]; rfl
     . simp [Env.get, Env.set]
       bv_omega
@@ -168,7 +174,7 @@ theorem infinite_loop : ¬ BigStep σ loop σ' := by
   case whileFalse cFalse =>
     unfold loop at h'
     cases h'
-    simp at cFalse
+    simp [Expr.eval] at cFalse
 
 /-- Optimizing a program doesn't change its meaning -/
 theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
@@ -189,12 +195,13 @@ theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
     constructor
     rw [← Expr.optimize_ok]
     assumption
-  | ifTrue isTrue l ih =>
+  | ifTrue ceq hnn l ih =>
     split
     next isFalse =>
-      rw [Expr.optimize_ok] at isTrue
-      rw [isFalse] at isTrue
-      simp [Truthy, Expr.eval] at isTrue
+      exfalso
+      rw [Expr.optimize_ok, isFalse] at ceq
+      simp [Expr.eval] at ceq
+      simp [ceq] at hnn
     next notFalse _isConst =>
       apply ih
     next =>
@@ -203,6 +210,7 @@ theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
       . apply BigStep.ifTrue
         . rw [← Expr.optimize_ok]
           assumption
+        · assumption
         . assumption
   | ifFalse isFalse l ih =>
     split
@@ -210,7 +218,7 @@ theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
       apply ih
     next nonZero isConst =>
       rw [Expr.optimize_ok, isConst] at isFalse
-      simp at isFalse
+      simp [Expr.eval] at isFalse
       contradiction
     next =>
       split
@@ -224,15 +232,17 @@ theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
     apply BigStep.whileFalse
     rw [← Expr.optimize_ok]
     assumption
-  | whileTrue isTrue bodyStep nextStep ih1 ih2 =>
+  | whileTrue isTrue hnn bodyStep nextStep ih1 ih2 =>
     split
     next c isZero =>
       rw [Expr.optimize_ok, isZero] at isTrue
-      simp at isTrue
+      simp [Expr.eval] at isTrue
+      subst isTrue
+      contradiction
     next c isNotZero =>
       apply BigStep.whileTrue
-      . rw [← Expr.optimize_ok]
-        assumption
+      . rw [← Expr.optimize_ok, isTrue]
+      · assumption
       . apply ih1
       . simp [optimize] at ih2
         assumption
@@ -298,15 +308,18 @@ theorem run_some_implies_big_step : run σ s n = some σ' → BigStep σ s σ' :
     constructor <;> trivial
   case case4 ih1 ih2 =>
     let ⟨v, has_val, next_env⟩ := term
-    split at next_env <;> simp_all [BigStep.ifTrue, BigStep.ifFalse]
+    split at next_env
+    · apply BigStep.ifFalse <;> simp_all
+    · apply BigStep.ifTrue (v := v) <;> simp_all
   case case5 ih1 ih2 =>
     let ⟨v, has_val, next_env⟩ := term
     split at next_env
     . simp_all [BigStep.whileFalse]
     . simp [bind_eq_some] at next_env
       let ⟨σ'', run_s1_eq, run_while_eq⟩ := next_env
-      apply BigStep.whileTrue
+      apply BigStep.whileTrue (v := v)
       . simp [*]
+      · assumption
       . exact ih1 run_s1_eq
       . exact ih2 _ run_while_eq
 
@@ -337,3 +350,28 @@ theorem run_some_more_fuel (h : n ≤ m) : run σ s n = some σ' → run σ s m 
         constructor
         · apply ih1 h s1
         · apply ih2 _ h s2
+
+theorem big_step_implies_run_some (h : BigStep σ s σ') : ∃ n, run σ s n = some σ':= by
+  induction h
+  all_goals try solve | simp_all [run]
+  case «seq» ih1 ih2 =>
+    let ⟨n1, ih1⟩ := ih1
+    let ⟨n2, ih2⟩ := ih2
+    apply Exists.intro (max n1 n2)
+    rw [run]
+    rw [run_some_more_fuel (by omega) ih1]
+    rw [Option.bind_eq_bind, Option.some_bind]
+    rw [run_some_more_fuel (by omega) ih2]
+  case «whileTrue» v σ''' body σ' c σ'' hc hnn _ _ ih1 ih2 =>
+    let ⟨n1, ih1⟩ := ih1
+    let ⟨n2, ih2⟩ := ih2
+    apply Exists.intro (max n1 n2 + 1)
+    simp [run, hc]
+    split
+    · contradiction
+    · rw [run_some_more_fuel (by omega) ih1]
+      simp
+      rw [run_some_more_fuel (by omega) ih2]
+  case «whileFalse» h =>
+    apply Exists.intro 1
+    simp [run, h]
