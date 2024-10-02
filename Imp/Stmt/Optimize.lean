@@ -22,7 +22,8 @@ def optimize : Stmt → Stmt
       let s2' := s2.optimize
       if s1' = s2' then
         s1'
-      else imp {if (~c') {~s1.optimize} else {~s2.optimize}}
+      else
+        imp {if (~c') {~s1'} else {~s2'}}
   | imp {while (~c) {~s}} =>
     let c' := c.optimize
     match c' with

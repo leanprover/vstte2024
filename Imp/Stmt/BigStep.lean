@@ -92,11 +92,10 @@ attribute [simp] BigStep.skip
 
 
 @[simp]
-theorem BigStep.skip_pre_eq_post : BigStep σ (imp {skip;}) σ' = (σ = σ') := by
-  simp only [eq_iff_iff]
+theorem BigStep.skip_pre_eq_post : BigStep σ (imp {skip;}) σ' ↔ (σ = σ') := by
   constructor
-  . intro .skip <;> rfl
-  . intros; simp [*]
+  . intro .skip; rfl
+  . intro heq; simp [heq]
 
 
 
@@ -310,3 +309,31 @@ theorem run_some_implies_big_step : run σ s n = some σ' → BigStep σ s σ' :
       . simp [*]
       . exact ih1 run_s1_eq
       . exact ih2 _ run_while_eq
+
+theorem run_some_more_fuel (h : n ≤ m) : run σ s n = some σ' → run σ s m = some σ' := by
+  induction σ, s, n using run.induct generalizing σ' m
+  all_goals simp_all [run, bind_eq_some]
+  case case2 ih1 ih2 =>
+    intros σ'' s1 s2
+    apply Exists.intro σ''
+    constructor
+    · exact ih1 h s1
+    · exact ih2 σ'' h s2
+  case case4 ih1 ih2 =>
+    intro x _
+    split <;> (intro; simp_all)
+  case case5 ih1 ih2 =>
+    cases m
+    case zero => simp at h
+    case succ m =>
+      simp at h
+      simp (config := {contextual:= true}) [run, bind_eq_some]
+      intro x _
+      split
+      · simp
+      · simp [bind_eq_some]
+        intro x s1 s2
+        apply Exists.intro x
+        constructor
+        · apply ih1 h s1
+        · apply ih2 _ h s2
