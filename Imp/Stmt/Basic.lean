@@ -27,7 +27,7 @@ syntax "skip" ";" : stmt
 /-- Sequencing: one statement after another -/
 syntax stmt ppDedent(ppLine stmt) : stmt
 /-- Assignment -/
-syntax varname " := " exp ";" : stmt
+syntax ident " := " exp ";" : stmt
 /-- Conditional statement -/
 syntax "if " "(" exp ")" ppHardSpace "{" ppLine stmt ppDedent(ppLine "}" ppHardSpace "else" ppHardSpace "{") ppLine stmt ppDedent(ppLine "}") : stmt
 /-- Loop -/
@@ -58,8 +58,8 @@ macro_rules
     `(Stmt.skip)
   | `(imp { $s1 $s2 }) =>
     `(Stmt.seq (imp {$s1}) (imp {$s2}))
-  | `(imp { $x:varname := $e;}) =>
-    `(Stmt.assign (var {$x}) (expr {$e}))
+  | `(imp { $x:ident := $e;}) =>
+    `(Stmt.assign (var {$x:ident}) (expr {$e}))
   | `(imp { if ($c) {$s1} else {$s2} }) =>
     `(Stmt.if (expr{$c}) (imp{$s1}) (imp{$s2}))
   | `(imp { while ($c) {$s} }) =>

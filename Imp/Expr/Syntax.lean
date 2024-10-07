@@ -8,11 +8,7 @@ open Lean PrettyPrinter Parenthesizer
 
 /- Add a new nonterminal to Lean's grammar, called `varname` -/
 /-- Variable names in Imp -/
-declare_syntax_cat varname
-
-/- There are two productions: identifiers and antiquoted terms -/
-syntax ident : varname
-syntax:max "~" term:max : varname
+syntax varname := ident
 
 /- `varname`s are included in terms using `var { ... }`, which is a hook on which to hang the macros
 that translate the `varname` syntax into ordinary Lean expressions. -/
@@ -21,7 +17,6 @@ syntax "var " "{" varname "}" : term
 /- These macros translate each production of the `varname` nonterminal into Lean expressions -/
 macro_rules
   | `(var { $x:ident }) => `(term|$(quote x.getId.toString))
-  | `(var { ~$stx }) => pure stx
 
 /-- Expressions in Imp -/
 declare_syntax_cat exp
@@ -76,9 +71,6 @@ syntax:35 exp:35 " || " exp:36 : exp
 /-- Parentheses for grouping -/
 syntax "(" exp ")" : exp
 
-/-- Escape to Lean -/
-syntax:max "~" term:max : exp
-
 /-- Embed an Imp expression into a Lean expression -/
 syntax:min "expr " "{ " exp " }" : term
 
@@ -110,7 +102,7 @@ macro_rules
   | `(expr{$e1 ≥ $e2}) => `(Expr.bin .le (expr{$e2}) (expr{$e1}))
   | `(expr{$e1 > $e2}) => `(Expr.bin .lt (expr{$e2}) (expr{$e1}))
   | `(expr{($e)}) => `(expr{$e})
-  | `(expr{~$stx}) => pure stx
+  | `(expr{$stx}) => if Syntax.isAntiquot stx then return Syntax.getAntiquotTerm stx else Macro.throwUnsupported
 
 
 -- Copied from Lean's term parenthesizer - applies the precedence rules in the grammar to add

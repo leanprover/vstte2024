@@ -1,3 +1,4 @@
+import Lean.Parser
 namespace Imp.Expr
 
 /-- Unary operators -/
@@ -26,3 +27,8 @@ inductive Expr where
   | un (op : Expr.UnOp) (e : Expr)
   | bin (op : Expr.BinOp) (e1 e2 : Expr)
 deriving Repr, DecidableEq
+
+open Lean Parser
+
+initialize
+  register_parser_alias incQuotDepth
