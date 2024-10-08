@@ -6,10 +6,23 @@ import Imp.Stmt
 
 namespace Imp.Stmt
 
-
 /-
 The final demo - read this file last!
 -/
+
+def swap2 : Stmt := imp {
+  y := x + y;
+  x := y - x;
+  y := y - x;
+}
+
+example : ∃σ', BigStep (Env.init 0 |>.set "x" x |>.set "y" y) swap2 σ' ∧ σ'.get "x" = y ∧ σ'.get "y" = x  := by
+  repeat' constructor
+  · simp
+    bv_decide
+  · simp
+    bv_decide
+
 
 def popcountLoop : Stmt := imp {
   i := 32;
@@ -63,9 +76,6 @@ def test_popcount (x : BitVec 32) : Bool :=
 /-- info: true -/
 #guard_msgs in
 #eval test_popcount 129837
-
-
-
 
 
 theorem popCount_correct : test_popcount x := by

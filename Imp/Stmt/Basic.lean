@@ -74,6 +74,7 @@ def swap : Stmt := imp {
   y := temp;
 }
 
+
 def min : Stmt := imp {
   if (x < y) {
     min := x;

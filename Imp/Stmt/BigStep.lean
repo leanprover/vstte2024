@@ -86,6 +86,7 @@ matter what the input values are.
 example : ∃σ', BigStep (Env.init 0 |>.set "x" x |>.set "y" y) swap σ' ∧ σ'.get "x" = y ∧ σ'.get "y" = x  := by
   repeat' constructor
 
+
 /--
 `min` computes the minimum of its inputs.
 -/
