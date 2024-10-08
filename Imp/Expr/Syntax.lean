@@ -40,9 +40,6 @@ syntax varname : exp
 /-- Numeric constant -/
 syntax num : exp
 
-/-- Arithmetic complement -/
-syntax:75 "-" exp:75 : exp
-
 /-- Multiplication -/
 syntax:70 exp:70 " * " exp:71 : exp
 /-- Division -/
@@ -58,8 +55,6 @@ syntax:55 exp:55 " <<< " exp:56 :exp
 /-- Right shift -/
 syntax:55 exp:55 " >>> " exp:56 :exp
 
-/-- Boolean negation -/
-syntax:75 "!" exp:75 : exp
 /-- Less than -/
 syntax:50 exp:50 " < " exp:51 : exp
 /-- Less than or equal to -/
@@ -95,32 +90,29 @@ macro_rules
   | `(expr{$x:ident}) => `(Expr.var $(quote x.getId.toString))
   | `(expr{$n:num}) => `(Expr.const $(quote n.getNat))
 
-  | `(expr{-$e}) => `(Expr.un .neg (expr{$e}))
-  | `(expr{!$e}) => `(Expr.un .not (expr{$e}))
+  | `(expr{$e1 + $e2}) => `(Expr.op .plus (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 * $e2}) => `(Expr.op .times (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 - $e2}) => `(Expr.op .minus (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 / $e2}) => `(Expr.op .div (expr{$e1}) (expr{$e2}))
 
-  | `(expr{$e1 + $e2}) => `(Expr.bin .plus (expr{$e1}) (expr{$e2}))
-  | `(expr{$e1 * $e2}) => `(Expr.bin .times (expr{$e1}) (expr{$e2}))
-  | `(expr{$e1 - $e2}) => `(Expr.bin .minus (expr{$e1}) (expr{$e2}))
-  | `(expr{$e1 / $e2}) => `(Expr.bin .div (expr{$e1}) (expr{$e2}))
-
-  | `(expr{$e1 >>> $e2}) => `(Expr.bin .rsh (expr{$e1}) (expr{$e2}))
-  | `(expr{$e1 <<< $e2}) => `(Expr.bin .lsh (expr{$e1}) (expr{$e2}))
-  | `(expr{$e1 ||| $e2}) => `(Expr.bin .bor (expr{$e1}) (expr{$e2}))
-  | `(expr{$e1 &&& $e2}) => `(Expr.bin .band (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 >>> $e2}) => `(Expr.op .rsh (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 <<< $e2}) => `(Expr.op .lsh (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 ||| $e2}) => `(Expr.op .bor (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 &&& $e2}) => `(Expr.op .band (expr{$e1}) (expr{$e2}))
 
 
-  | `(expr{$e1 && $e2}) => `(Expr.bin .and (expr{$e1}) (expr{$e2}))
-  | `(expr{$e1 || $e2}) => `(Expr.bin .or (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 && $e2}) => `(Expr.op .and (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 || $e2}) => `(Expr.op .or (expr{$e1}) (expr{$e2}))
 
-  | `(expr{$e1 < $e2}) => `(Expr.bin .lt (expr{$e1}) (expr{$e2}))
-  | `(expr{$e1 ≤ $e2}) => `(Expr.bin .le (expr{$e1}) (expr{$e2}))
-  | `(expr{$e1 == $e2}) => `(Expr.bin .eq (expr{$e1}) (expr{$e2}))
-  | `(expr{$e1 ≥ $e2}) => `(Expr.bin .le (expr{$e2}) (expr{$e1}))
-  | `(expr{$e1 > $e2}) => `(Expr.bin .lt (expr{$e2}) (expr{$e1}))
+  | `(expr{$e1 < $e2}) => `(Expr.op .lt (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 ≤ $e2}) => `(Expr.op .le (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 == $e2}) => `(Expr.op .eq (expr{$e1}) (expr{$e2}))
+  | `(expr{$e1 ≥ $e2}) => `(Expr.op .le (expr{$e2}) (expr{$e1}))
+  | `(expr{$e1 > $e2}) => `(Expr.op .lt (expr{$e2}) (expr{$e1}))
   | `(expr{($e)}) => `(expr{$e})
   | `(expr{~$stx}) => pure stx
 
-/-- info: bin BinOp.plus («var» "x") (bin BinOp.times («var» "y") («var» "z")) : Expr -/
+/-- info: op BinOp.plus («var» "x") (op BinOp.times («var» "y") («var» "z")) : Expr -/
 #guard_msgs in
 #check expr { x + y * z }
 

@@ -46,13 +46,6 @@ theorem set_sort {σ : Env} : x < y → (σ.set y v1).set x v2 = (σ.set x v2).s
 
 end Env
 
-namespace Expr
-
-/-- Helper that implements unary operators -/
-def UnOp.apply : UnOp → Value → Option Value
-  | .neg, x => some (- x)
-  | .not, x => some (if x == 0 then 1 else 0)
-
 /-- Helper that implements binary operators -/
 def BinOp.apply : BinOp → Value → Value → Option Value
   | .plus, x, y => some (x + y)
@@ -74,13 +67,10 @@ Evaluates an expression, finding the value if it has one.
 
 Expressions that divide by zero don't have values - the result is undefined.
 -/
-def eval (σ : Env) : Expr → Option Value
+def Expr.eval (σ : Env) : Expr → Option Value
   | .const i => some i
   | .var x => σ.get x
-  | .un op e => do
-    let v ← e.eval σ
-    op.apply v
-  | .bin op e1 e2 => do
+  | .op bop e1 e2 => do
     let v1 ← e1.eval σ
     let v2 ← e2.eval σ
-    op.apply v1 v2
+    bop.apply v1 v2

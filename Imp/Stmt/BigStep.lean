@@ -98,7 +98,7 @@ example : ∃σ', BigStep (Env.init 0 |>.set "x" x |>.set "y" y) min σ' ∧ if 
   by_cases h : x < y
   . apply Exists.intro; constructor
     . apply BigStep.ifTrue
-      . simp [Expr.eval, Expr.BinOp.apply, Env.get, Env.set, *]
+      . simp [Expr.eval, BinOp.apply, Env.get, Env.set, *]
         rfl
       . simp
       . constructor; simp [Expr.eval, Env.get, Env.set]; rfl
@@ -106,7 +106,7 @@ example : ∃σ', BigStep (Env.init 0 |>.set "x" x |>.set "y" y) min σ' ∧ if 
       bv_omega
   . apply Exists.intro; constructor
     . apply BigStep.ifFalse
-      . simp [Expr.eval, Expr.BinOp.apply, Env.get, Env.set, *]
+      . simp [Expr.eval, BinOp.apply, Env.get, Env.set, *]
       . constructor; simp [Expr.eval, Env.get, Env.set]; rfl
     . simp [Env.get, Env.set]
       intro; contradiction

@@ -45,7 +45,7 @@ partial def delabExprInner : DelabM (TSyntax `exp) := do
     | Expr.var _ => do
       let x ← withAppArg delabNameInner
       `(exp|$x:varname)
-    | Expr.bin op _ _ =>
+    | Expr.op op _ _ =>
       let s1 ← withAppFn <| withAppArg delabExprInner
       let s2 ← withAppArg delabExprInner
       match_expr op with
@@ -63,24 +63,17 @@ partial def delabExprInner : DelabM (TSyntax `exp) := do
       | BinOp.band => `(exp| $s1 &&& $s2)
       | BinOp.bor => `(exp| $s1 ||| $s2)
       | _ => `(exp|~(Expr.bin $(← withAppFn <| withAppFn <| withAppArg delab) $(← withAppFn <| withAppArg delab) $(← withAppArg delab)))
-    | Expr.un op _ =>
-      let s ← withAppArg delabExprInner
-      match_expr op with
-      | UnOp.neg => `(exp|-$s)
-      | UnOp.not => `(exp|!$s)
-      | _ => `(exp| ~(Expr.un $(← withAppFn <| withAppArg delab) $(← withAppArg delab)))
     | _ =>
       `(exp| ~$(← delab))
   annAsTerm stx
 
-@[delab app.Imp.Expr.const, delab app.Imp.Expr.var, delab app.Imp.Expr.un, delab app.Imp.Expr.bin]
+@[delab app.Imp.Expr.const, delab app.Imp.Expr.var, delab app.Imp.Expr.op]
 partial def delabExpr : Delab := do
   -- This delaborator only understands a certain arity - give up if it's incorrect
   guard <| match_expr ← getExpr with
     | Expr.const _ => true
     | Expr.var _ => true
-    | Expr.un _ _ => true
-    | Expr.bin _ _ _ => true
+    | Expr.op _ _ _ => true
     | _ => false
   match ← delabExprInner with
   | `(exp|~$e) => pure e
@@ -105,10 +98,6 @@ partial def delabExpr : Delab := do
 /-- info: expr { 5 + (23 - 10) } : Expr -/
 #guard_msgs in
 #check expr { 5 + (23 - 10) }
-
-/-- info: expr { -8 <<< 4 } : Expr -/
-#guard_msgs in
-#check expr {-8 <<< 4}
 
 /--
 info: let x := expr { 23 };
