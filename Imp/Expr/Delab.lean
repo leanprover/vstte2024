@@ -116,3 +116,7 @@ expr { ~x * ~x } : Expr
 -/
 #guard_msgs in
 #check let x := expr {23}; expr {~x * ~x}
+
+/-- info: expr { x + y * z } : Expr -/
+#guard_msgs in
+#check expr { x + y * z }

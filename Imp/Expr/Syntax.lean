@@ -23,6 +23,14 @@ macro_rules
   | `(var { $x:ident }) => `(term|$(quote x.getId.toString))
   | `(var { ~$stx }) => pure stx
 
+/-- info: "x" : String -/
+#guard_msgs in
+#check var { x }
+
+/-- info: "a lean" ++ "expr" : String -/
+#guard_msgs in
+#check var { ~("a lean" ++ "expr") }
+
 /-- Expressions in Imp -/
 declare_syntax_cat exp
 
@@ -112,10 +120,14 @@ macro_rules
   | `(expr{($e)}) => `(expr{$e})
   | `(expr{~$stx}) => pure stx
 
+/-- info: bin BinOp.plus («var» "x") (bin BinOp.times («var» "y") («var» "z")) : Expr -/
+#guard_msgs in
+#check expr { x + y * z }
+
 
 -- Copied from Lean's term parenthesizer - applies the precedence rules in the grammar to add
 -- parentheses as needed. This isn't needed when adding new input syntax to Lean, but because the
--- file `Delab.lean` makes Lean use this syntax in its output, the parentheses are needed.
+-- file `Delab.lean` makes Lean use of this syntax in its output, the parentheses are needed.
 @[category_parenthesizer exp]
 def exp.parenthesizer : CategoryParenthesizer | prec => do
   maybeParenthesize `exp true wrapParens prec $
