@@ -68,7 +68,7 @@ Evaluates an expression, finding the value if it has one.
 Expressions that divide by zero don't have values - the result is undefined.
 -/
 def Expr.eval (σ : Env) : Expr → Option Value
-  | .const i => some i
+  | .const i => i
   | .var x => σ.get x
   | .op bop e1 e2 => do
     let v1 ← e1.eval σ

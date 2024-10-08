@@ -15,3 +15,11 @@ inductive Expr where
   | var (name : String)
   | op (op : BinOp) (e1 e2 : Expr)
 deriving Repr, DecidableEq
+
+/-- info: Expr.op BinOp.plus (Expr.const 23) (Expr.const 42) : Expr -/
+#guard_msgs in
+#check Expr.op BinOp.plus (Expr.const 23) (Expr.const 42)
+
+/-- info: Expr.op BinOp.plus (Expr.const 23) (Expr.const 42) : Expr -/
+#guard_msgs in
+#check Expr.op .plus (.const 23) (.const 42)

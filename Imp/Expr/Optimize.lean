@@ -23,10 +23,9 @@ theorem optimize_ok (e : Expr) : e.eval σ = e.optimize.eval σ := by
   induction e <;> simp [optimize]
   case op bop e1 e2 ih1 ih2 =>
     split <;> simp [eval, *]
-    cases bop <;> simp [BinOp.apply, eval]
     split
-    . simp [eval, BinOp.apply]; split <;> trivial
-    . simp [eval]
+    · simp [eval, *]
+    · simp [eval]
 
 /--
 Optimization doesn't change the meaning of any expression
