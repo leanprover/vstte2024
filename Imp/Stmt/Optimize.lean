@@ -28,6 +28,7 @@ def optimize : Stmt → Stmt
     let c' := c.optimize
     match c' with
     | .const 0 => imp {skip;}
+    | .const _ => imp {while (1) {skip;}}
     | _ => imp {while (~c') {~s.optimize}}
   | imp {~x := ~e;} =>
     imp {~x := ~e.optimize;}

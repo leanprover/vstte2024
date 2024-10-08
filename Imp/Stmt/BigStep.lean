@@ -179,9 +179,15 @@ theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
         . assumption
   | whileFalse =>
     split <;> try simp
-    apply BigStep.whileFalse
-    rw [← Expr.optimize_ok]
-    assumption
+    next c body isFalse c' v hvpos heq =>
+      exfalso
+      rw [Expr.optimize_ok, heq] at isFalse
+      simp [Expr.eval] at isFalse
+      contradiction
+    next =>
+      apply BigStep.whileFalse
+      rw [← Expr.optimize_ok]
+      assumption
   | whileTrue isTrue hnn bodyStep nextStep ih1 ih2 =>
     split
     next c isZero =>
@@ -189,6 +195,9 @@ theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
       simp [Expr.eval] at isTrue
       subst isTrue
       contradiction
+    next c isNotZero =>
+      -- this needs a much generalized  `infinite_loop` lemma here.
+      sorry
     next c isNotZero =>
       apply BigStep.whileTrue
       . rw [← Expr.optimize_ok, isTrue]
