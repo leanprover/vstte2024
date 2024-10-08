@@ -10,36 +10,9 @@ namespace Imp.Stmt
 The final demo - read this file last!
 -/
 
-def swap2 : Stmt := imp {
-  y := x + y;
-  x := y - x;
-  y := y - x;
-}
-
-example : ∃σ', BigStep (Env.init 0 |>.set "x" x |>.set "y" y) swap2 σ' ∧ σ'.get "x" = y ∧ σ'.get "y" = x  := by
-  repeat' constructor
-  · simp
-    bv_decide
-  · simp
-    bv_decide
-
-
-def popcountLoop : Stmt := imp {
-  i := 32;
-  count := 0;
-  while (i > 0) {
-    count := count + (x &&& 1);
-    i := i - 1;
-    x := x >>> 1;
-  }
-  x := count;
-}
-
-#eval run (Env.init 0 |>.set "x" 5) popcountLoop 40 |>.get! |>.get "x"
-
 /--
-Alternative implementation of popcount from Hacker's Delight, Second Edition, by Henry S. Warren,
-Jr. Figure 5-2 on p. 82.
+popcount implementation from Hacker's Delight, Second Edition, by Henry S. Warren, Jr.
+Figure 5-2 on p. 82.
 -/
 def popcount : Stmt := imp {
   x := x - ((x >>> 1) &&& 0x55555555);
@@ -62,7 +35,7 @@ where
       go (x >>> 1#32) pop i
 
 def test_popcount (x : BitVec 32) : Bool :=
-  run (Env.init x) popcount 8 |>.map (·.get "x" == pop_spec x) |>.getD false
+  run (Env.init x) popcount 2024 |>.map (·.get "x" == pop_spec x) |>.getD false
 
 /-- info: true -/
 #guard_msgs in

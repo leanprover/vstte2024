@@ -35,15 +35,6 @@ theorem get_set_different {σ : Env} : x ≠ y → (σ.set x v).get y = σ.get y
   intros
   simp [get, set, *]
 
-@[simp]
-theorem set_sort {σ : Env} : x < y → (σ.set y v1).set x v2 = (σ.set x v2).set y v1 := by
-  intro
-  have : x ≠ y := by apply String.ne_of_lt <;> trivial
-  simp [set]
-  funext
-  repeat' split <;> simp_all
-
-
 end Env
 
 /-- Helper that implements binary operators -/
