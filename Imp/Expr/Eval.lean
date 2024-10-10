@@ -14,14 +14,13 @@ deriving Inhabited
 
 namespace Env
 
-/-- Set a value in an environment -/
-def set (x : String) (v : Value) (σ : Env) : Env where
-  get y := if x == y then v else σ.get y
-
-
 /-- Initialize an environment, setting all uninitialized memory to `i` -/
 def init (i : Value) : Env where
   get _ := i
+
+/-- Set a value in an environment -/
+def set (x : String) (v : Value) (σ : Env) : Env where
+  get y := if x == y then v else σ.get y
 
 @[simp]
 theorem get_init : (Env.init v).get x = v := by rfl
@@ -39,16 +38,19 @@ end Env
 
 /-- Helper that implements binary operators -/
 def BinOp.apply : BinOp → Value → Value → Option Value
-  | .plus, x, y => some (x + y)
-  | .minus, x, y => some (x - y)
-  | .times, x, y => some (x * y)
-  | .lsh, x, y => some (x <<< y)
-  | .rsh, x, y => some (x >>> y)
-  | .band, x, y => some (x &&& y)
-  | .bor, x, y => some (x ||| y)
-  | .div, x, y => if y == 0 then none else some (x / y)
-  | .and, x, y => some (if x == 0 then 0 else y)
-  | .or, x, y => some (if x == 0 then y else x)
+  | .plus, x, y => x + y
+  | .minus, x, y => x - y
+  | .times, x, y => x * y
+  | .lsh, x, y => x <<< y
+  | .rsh, x, y => x >>> y
+  | .band, x, y => x &&& y
+  | .bor, x, y => x ||| y
+  | .div, _, 0 => none
+  | .div, x, y => x / y
+  | .and, 0, _ => some 0
+  | .and, _, y => y
+  | .or, 0, y => y
+  | .or, x, _ => x
   | .eq, x, y => some (if x == y then 1 else 0)
   | .le, x, y => some (if x ≤ y then 1 else 0)
   | .lt, x, y => some (if x < y then 1 else 0)
