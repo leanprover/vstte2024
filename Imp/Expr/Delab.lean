@@ -13,9 +13,16 @@ namespace Imp.Expr.Delab
 def annAsTerm {any} (stx : TSyntax any) : DelabM (TSyntax any) :=
   (⟨·⟩) <$> annotateTermInfo ⟨stx.raw⟩
 
+def delabNameInner : DelabM (TSyntax `varname) := do
+  let e ← getExpr
+  match e with
+  | .lit (.strVal s) =>
+    let x := mkIdent <| .mkSimple s
+    pure <| ⟨x.raw⟩
+  | _ => `(varname|~($(← delab))) >>= annAsTerm
+
 partial def delabExprInner : DelabM (TSyntax `exp) := do
   let e ← getExpr
-  let fail := `(exp| ~$(← delab))
   let stx ←
     match_expr e with
     | Expr.const x =>
@@ -33,13 +40,11 @@ partial def delabExprInner : DelabM (TSyntax `exp) := do
           pure <| ⟨Syntax.mkNumLit (toString n') |>.raw⟩
         else withAppArg `(exp| ~$(← delab))
       | BitVec.ofNat _ _ => (⟨·.raw⟩) <$> (withAppArg <| withAppArg <| delab)
-      | _ => fail
-    | Expr.var e => do
-      match e with
-      | .lit (.strVal s) =>
-        let x := mkIdent <| .mkSimple s
-        pure <| ⟨x.raw⟩
-      | _ => fail
+      | _ =>
+        `(exp| ~(Expr.const $(← withAppArg delab)))
+    | Expr.var _ => do
+      let x ← withAppArg delabNameInner
+      `(exp|$x:varname)
     | Expr.op op _ _ =>
       let s1 ← withAppFn <| withAppArg delabExprInner
       let s2 ← withAppArg delabExprInner
@@ -57,8 +62,9 @@ partial def delabExprInner : DelabM (TSyntax `exp) := do
       | BinOp.rsh => `(exp| $s1 >>> $s2)
       | BinOp.band => `(exp| $s1 &&& $s2)
       | BinOp.bor => `(exp| $s1 ||| $s2)
-      | _ => fail
-    | _ => fail
+      | _ => `(exp|~(Expr.bin $(← withAppFn <| withAppFn <| withAppArg delab) $(← withAppFn <| withAppArg delab) $(← withAppArg delab)))
+    | _ =>
+      `(exp| ~$(← delab))
   annAsTerm stx
 
 @[delab app.Imp.Expr.const, delab app.Imp.Expr.var, delab app.Imp.Expr.op]
@@ -99,3 +105,7 @@ expr { ~x * ~x } : Expr
 -/
 #guard_msgs in
 #check let x := expr {23}; expr {~x * ~x}
+
+/-- info: expr { x + y * z } : Expr -/
+#guard_msgs in
+#check expr { x + y * z }
