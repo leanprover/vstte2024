@@ -5,37 +5,11 @@ namespace Imp.Expr
 
 open Lean PrettyPrinter Parenthesizer
 
-
-/- Add a new nonterminal to Lean's grammar, called `varname` -/
-/-- Variable names in Imp -/
-declare_syntax_cat varname
-
-/- There are two productions: identifiers and antiquoted terms -/
-syntax ident : varname
-syntax:max "~" term:max : varname
-
-/- `varname`s are included in terms using `var { ... }`, which is a hook on which to hang the macros
-that translate the `varname` syntax into ordinary Lean expressions. -/
-syntax "var " "{" varname "}" : term
-
-/- These macros translate each production of the `varname` nonterminal into Lean expressions -/
-macro_rules
-  | `(var { $x:ident }) => `(term|$(quote x.getId.toString))
-  | `(var { ~$stx }) => pure stx
-
-/-- info: "x" : String -/
-#guard_msgs in
-#check var { x }
-
-/-- info: "a lean" ++ "expr" : String -/
-#guard_msgs in
-#check var { ~("a lean" ++ "expr") }
-
 /-- Expressions in Imp -/
 declare_syntax_cat exp
 
-/-- Variable names -/
-syntax varname : exp
+/-- Variables -/
+syntax ident : exp
 
 /-- Numeric constant -/
 syntax num : exp
@@ -112,7 +86,7 @@ macro_rules
   | `(expr{($e)}) => `(expr{$e})
   | `(expr{~$stx}) => pure stx
 
-/-- info: op BinOp.plus («var» "x") (op BinOp.times («var» "y") («var» "z")) : Expr -/
+/-- info: op BinOp.plus (var "x") (op BinOp.times (var "y") (var "z")) : Expr -/
 #guard_msgs in
 #check expr { x + y * z }
 
