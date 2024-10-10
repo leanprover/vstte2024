@@ -36,6 +36,11 @@ theorem get_set_different {σ : Env} : x ≠ y → (σ.set x v).get y = σ.get y
 
 end Env
 
+def UnOp.apply : UnOp → Value → Option Value
+  | .neg, x => some (-x)
+  | .not, 0 => some 1
+  | .not, _ => some 0
+
 /-- Helper that implements binary operators -/
 def BinOp.apply : BinOp → Value → Value → Option Value
   | .plus, x, y => x + y
@@ -63,6 +68,9 @@ Expressions that divide by zero don't have values - the result is undefined.
 def Expr.eval (σ : Env) : Expr → Option Value
   | .const i => i
   | .var x => σ.get x
+  | .unop uop e => do
+    let v ← e.eval σ
+    uop.apply v
   | .op bop e1 e2 => do
     let v1 ← e1.eval σ
     let v2 ← e2.eval σ
