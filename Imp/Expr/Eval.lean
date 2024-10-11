@@ -8,6 +8,7 @@ namespace Imp
 abbrev Value := BitVec 32
 
 /-- An environment maps variables names to their values (no pointers) -/
+@[ext]
 structure Env where
   get : String → Value
 deriving Inhabited
@@ -48,6 +49,14 @@ theorem get_set_same {σ : Env} : σ[[ x := v ]][[x]] = v := by
 theorem get_set_different {σ : Env} : x ≠ y →  σ[[ x := v ]][[y]] = σ[[ y ]] := by
   intros
   simp [get, set, *]
+
+@[simp]
+theorem set_get_same {σ : Env} : σ[[ x := σ[[x]] ]] = σ := by
+  ext x : 2
+  simp [get, set]
+  intro h
+  simp [*]
+
 
 end Env
 

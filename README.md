@@ -76,7 +76,7 @@ Suggested tasks, in rough order of difficulty.
 * Add nice input syntax for `Env.get σ "x"` and `Env.set`, e.g. `σ[x]` and `σ[x := e]` and update
   some of the proof statements.
 
-* Add the optimization `x := x` to `Stmt.optimize`.
+* Add the optimization that replaces `x := x` by `skip` to `Stmt.optimize`.
 
   Use `#guard_msgs` to check that it does what you want it to do on a small example.
 
