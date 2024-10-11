@@ -81,33 +81,25 @@ example : ∃ σ', BigStep σ swap σ' ∧ σ'.get "x" = σ.get "y" ∧ σ'.get 
   repeat' constructor
 
 
-/--
-`min` computes the minimum of its inputs.
--/
-example : ∃σ', BigStep (Env.init 0 |>.set "x" x |>.set "y" y) min σ' ∧ if x < y then σ'.get "min" = x else σ'.get "min" = y := by
-  -- This takes the “wrong path” at if:
-  -- repeat' constructor
-  -- simp
-  unfold min
-  by_cases h : x < y
-  . apply Exists.intro; constructor
-    . apply BigStep.ifTrue
-      . simp [Expr.eval, BinOp.apply, *]
+example : ∃σ', BigStep σ min σ' ∧ if σ.get "x" < σ.get "y" then σ' = σ.set "min" (σ.get "x") else σ' = σ.set "min" (σ.get "y") := by
+  -- If we use
+  --   repeat' constructor
+  -- here, then this takes the wrong path at `if`.
+  -- Therefore, branch on the `if-then-else` in the goal.
+  split
+  -- an alternative tactic here would be `by_cases σ.get "x" < σ.get "y"`
+  · repeat' constructor -- luckily, right direction
+    simp [*]
+  · -- Still: repeat' constructor goes in the wrong direction
+    -- So, step by step:
+    unfold min
+    apply Exists.intro
+    constructor
+    · apply BigStep.ifFalse
+      · simp [Expr.eval, BinOp.apply, *]
+      · apply BigStep.assign
         rfl
-      . simp
-      . apply BigStep.assign
-        simp [Expr.eval]
-        rfl
-    . simp
-      bv_omega
-  . apply Exists.intro; constructor
-    . apply BigStep.ifFalse
-      . simp [Expr.eval, BinOp.apply, *]
-      . constructor
-        simp [Expr.eval]
-        rfl
-    . simp
-      bv_omega
+    · rfl
 
 def loop := imp {while (1) {skip;}}
 
