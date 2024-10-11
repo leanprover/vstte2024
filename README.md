@@ -71,11 +71,35 @@ Suggested tasks, in rough order of difficulty.
   If you have done both tasks, can you combine them?
 
   
-### First hands-on break
+### Second hands-on break
 
-**TODO**
+* Add nice input syntax for `Env.get σ "x"` and `Env.set`, e.g. `σ[x]` and `σ[x := e]` and update
+  some of the proof statements.
 
+* Add the optimization `x := x` to `Stmt.optimize`.
 
+  Use `#guard_msgs` to check that it does what you want it to do on a small example.
+
+  Finally, extend the verification proof.
+
+  Hints:
+
+  You may want to prove `@[simp] theorem set_get_same {σ : Env} : σ.set x (σ.get x) = σ` for that.
+  To prove an equality on `Env`, add the `@[ext]` attribute to the `Env` structure. This will allow
+  you to use `apply Env.ext` (or even start the proof with `ext y : 2` – check the docstring to see what that does.)
+
+* (Short but tricky):
+
+  Complete this proof that a looping program has no output
+  ```lean
+  def loop := imp {while (1) {skip;}}
+  theorem infinite_loop : ¬ BigStep σ loop σ' := by
+  ```
+  
+  Hint:
+
+  Rephrase the statement so that the three arguments to `BigStep` are variables, so that `induction` works. You can do that using a helper theorem that you finally apply, or explore the `generalize` tactic.
+ 
 ## Code Structure
 
  - `Imp/Expr.lean` re-exports the expression language:

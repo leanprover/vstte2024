@@ -101,19 +101,6 @@ example : ∃σ', BigStep σ min σ' ∧ if σ.get "x" < σ.get "y" then σ' = �
         rfl
     · rfl
 
-def loop := imp {while (1) {skip;}}
-
-/--
-`loop` is really an infinite loop - there is no final state that it can result in.
--/
-theorem infinite_loop : ¬ BigStep σ loop σ' := by
-  generalize h' : loop = l
-  intro h
-  induction h <;> try contradiction
-  case whileFalse σ c body cFalse =>
-    have : c = (expr { 1 }) := by simp_all [loop]
-    simp [Expr.eval, this] at cFalse
-
 /-- Optimizing a program doesn't change its meaning -/
 theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
   intro h
