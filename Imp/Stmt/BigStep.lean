@@ -121,66 +121,74 @@ theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
   | «skip» => constructor
   | seq s1 s2 ih1 ih2 =>
     split
-    next eq2 =>
-      rw [eq2] at ih1
-      cases ih1; apply ih2
-    next eq1 eq2 =>
-      rw [eq1] at ih2
-      cases ih2; apply ih1
+    next heq =>
+      rw [heq] at ih1
+      cases ih1
+      assumption
+    next heq _ =>
+      rw [heq] at ih2
+      cases ih2
+      assumption
     next =>
       apply BigStep.seq ih1 ih2
-  | assign m =>
-    constructor
-    rw [← Expr.optimize_ok]
+  | assign h =>
+    apply BigStep.assign
+    rw [← @Expr.optimize_ok']
     assumption
-  | ifTrue ceq hnn l ih =>
+  | ifTrue heval hnn _ ih =>
     split
-    next isFalse =>
+    next heq =>
       exfalso
-      rw [Expr.optimize_ok, isFalse] at ceq
-      simp [Expr.eval] at ceq
-      simp [ceq] at hnn
-    next notFalse _isConst =>
-      apply ih
+      apply hnn
+      rw [Expr.optimize_ok, heq] at heval
+      simp [Expr.eval] at heval
+      simp [heval]
+    next =>
+      assumption
     next =>
       split
-      . assumption
-      . apply BigStep.ifTrue
-        . rw [← Expr.optimize_ok]
+      · assumption
+      · apply BigStep.ifTrue
+        · rw [← @Expr.optimize_ok']
           assumption
         · assumption
-        . assumption
-  | ifFalse isFalse l ih =>
+        · assumption
+  | ifFalse heval _ ih =>
     split
     next =>
-      apply ih
-    next nonZero isConst =>
-      rw [Expr.optimize_ok, isConst] at isFalse
-      simp [Expr.eval] at isFalse
+      assumption
+    next heq =>
+      exfalso
+      rw [Expr.optimize_ok, heq] at heval
+      simp [Expr.eval] at heval
       contradiction
     next =>
       split
-      . simp [*]
-      . apply BigStep.ifFalse
-        . rw [← Expr.optimize_ok]
-          assumption
-        . assumption
-  | whileFalse =>
-    split <;> try simp
-    apply BigStep.whileFalse
-    rw [← Expr.optimize_ok]
-    assumption
-  | whileTrue isTrue hnn bodyStep nextStep ih1 ih2 =>
-    split
-    next c isZero =>
-      rw [Expr.optimize_ok, isZero] at isTrue
-      simp [Expr.eval] at isTrue
-      subst isTrue
-      contradiction
-    next c isNotZero =>
-      apply BigStep.whileTrue
-      . rw [← Expr.optimize_ok, isTrue]
-      · assumption
-      . apply ih1
-      . simp [optimize] at ih2
+      next heq =>
+        rw [heq]
         assumption
+      · apply BigStep.ifFalse
+        · rw [← @Expr.optimize_ok']
+          assumption
+        · assumption
+    | whileTrue heval hnn _ _ ih1 ih2 =>
+      split
+      next heq =>
+        exfalso
+        rw [Expr.optimize_ok, heq] at heval
+        simp [Expr.eval] at heval
+        simp [heval] at hnn
+      next =>
+        apply BigStep.whileTrue
+        · rw [← @Expr.optimize_ok']
+          assumption
+        · assumption
+        · assumption
+        · simp [optimize] at ih2
+          apply ih2
+    | whileFalse heval =>
+      split
+      · apply BigStep.skip
+      · apply BigStep.whileFalse
+        · rw [← Expr.optimize_ok]
+          assumption
