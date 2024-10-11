@@ -43,6 +43,8 @@ are suggested tasks that you could try:
 
 ### First hands-on break
 
+Suggested tasks, in rough order of difficulty.
+
 * Add unary operations (negation, logical not) to the expression language.
 
 * Let `Lean.Expr.optimize` apply rules like `0 + x = x`, `1 * x = x`.
@@ -56,6 +58,19 @@ are suggested tasks that you could try:
     If these theorems are set up just right, they are good `@[simp]` lemmas, and will make the
     subsequent proof easy.
 
+* Write a function `Expr.hasDiv : Expr → Bool` that checks if division is used in the expression.
+
+  Prove that if an expression has no division, then `Expr.eval` will always return a result.
+
+  Hint: There are various ways of phrasing this. You can use `Option.isSome` and write a theorem about
+  `Option.bind` and `Option.isSome`. Or you can define `Expr.eval'` that returns `Value` (no
+  `Option`) and prove that for expressions without division, the result of `Expr.eval` is
+  `Option.some` of the value returned by `Expr.eval'`.
+
+  Food for thought: How does this task relate to the previous task and the optimization `0 * x = 0`?
+  If you have done both tasks, can you combine them?
+
+  
 ### First hands-on break
 
 **TODO**
