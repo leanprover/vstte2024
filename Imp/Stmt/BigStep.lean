@@ -45,13 +45,17 @@ A first simple theorem: `skip` doesn't change the state.
 @[simp]
 theorem BigStep.skip_pre_eq_post : BigStep σ (imp {skip;}) σ' ↔ (σ = σ') := by
   constructor
-  . intro .skip; rfl
-  . intro heq; simp [heq, BigStep.skip]
+  . intro h
+    cases h
+    rfl
+  . intro heq
+    rw [heq]
+    apply BigStep.skip
 
 /--
 `swap` terminates, and the resulting environment contains swapped inputs.
 -/
-example : ∃σ', BigStep (Env.init 0 |>.set "x" 5 |>.set "y" 22) swap σ' ∧ σ'.get "x" = 22 ∧ σ'.get "y" = 5 := by
+example : ∃ σ', BigStep σ swap σ' ∧ σ'.get "x" = σ.get "y" ∧ σ'.get "y" = σ.get "x" := by
   unfold swap
   apply Exists.intro -- introduces ?w for the witness
   constructor
@@ -69,17 +73,11 @@ example : ∃σ', BigStep (Env.init 0 |>.set "x" 5 |>.set "y" 22) swap σ' ∧ �
   . simp
 
 /--
-`swap` terminates, and the resulting environment contains swapped inputs. This proof is shorter.
+`swap` terminates, and the resulting environment contains swapped inputs.
+This proof is shorter.
 (NB: `rfl` is a `constructor` of sorts, and the `simp` above aren't really needed.)
 -/
-example : ∃σ', BigStep (Env.init 0 |>.set "x" 5 |>.set "y" 22) swap σ' ∧ σ'.get "x" = 22 ∧ σ'.get "y" = 5 := by
-  repeat' constructor
-
-/--
-`swap` terminates, and the resulting environment contains swapped inputs. This version works no
-matter what the input values are.
--/
-example : ∃σ', BigStep (Env.init 0 |>.set "x" x |>.set "y" y) swap σ' ∧ σ'.get "x" = y ∧ σ'.get "y" = x  := by
+example : ∃ σ', BigStep σ swap σ' ∧ σ'.get "x" = σ.get "y" ∧ σ'.get "y" = σ.get "x" := by
   repeat' constructor
 
 
