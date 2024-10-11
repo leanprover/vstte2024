@@ -131,20 +131,10 @@ theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
       assumption
     next =>
       apply BigStep.seq ih1 ih2
-  | assign heval =>
-    split
-    next heq1 =>
-      split
-      next heq2 =>
-        cases heq2
-        simp [Expr.optimize_ok, heq1, Expr.eval] at heval
-        simp [← heval]
-      · apply BigStep.assign
-        rw [← @Expr.optimize_ok']
-        assumption
-    · apply BigStep.assign
-      rw [← @Expr.optimize_ok']
-      assumption
+  | assign h =>
+    apply BigStep.assign
+    rw [← @Expr.optimize_ok']
+    assumption
   | ifTrue heval hnn _ ih =>
     split
     next heq =>
