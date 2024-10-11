@@ -30,4 +30,10 @@ def optimize : Stmt → Stmt
     | .const 0 => imp {skip;}
     | _ => imp {while (~c') {~s.optimize}}
   | imp {~x := ~e;} =>
+    let e' := e.optimize
+    match e' with
+    | .var x' =>
+      if x = x' then imp {skip;}
+      else imp {~x := ~e.optimize;}
+    | _ =>
     imp {~x := ~e.optimize;}
