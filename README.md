@@ -1,24 +1,25 @@
-# Lean for Functional Programmers
+# Lean tutorial
 
-This is the accompanying code for "Lean for the Functional
-Programmer", a tutorial presented at *Mødegruppen for F#unktionelle
-Københavnere* by David Thrane Christiansen on 2024-08-27 and
-2024-09-24.
+**This material is still WIP.**
 
-The code from the first presentation is available [in another
-repository](https://github.com/david-christiansen/lean-fkbh-24).
+This is the accompanying code for the invited lean tutorial held at [VSTTE
+2024](https://www.soundandcomplete.org/vstte2024.html) by Sebastian Ullrich and Joachim Breitner.
+
+It is based on [material written by David Thrane
+Christiansen](https://github.com/david-christiansen/lean-fkbh-24-2) for the tutorial "Lean for the
+Functional Programmer", presented at *Mødegruppen for F#unktionelle Københavnere* by David Thrane
+Christiansen on 2024-08-27 and 2024-09-24.
 
 ## Overview
 
-This tutorial has two parts: an introduction to programming and
-proving in Lean, and a demonstration of using Lean to embed a small
-imperative language and reason about its semantics. This repository
-contains code for the second of the two.
+In this tutorial we will see the following features of Lean
 
-This tutorial is aimed at introducing Lean's language embedding
-features, with a tutorial focused on formalization rather than
-programming. In particular, this tutorial demonstrates formalizing the
-semantics of a small imperative language.
+* basic functional programming
+* extensible custom syntax for domain-specific functions
+* inductive predicates and proofs 
+
+The example use-case is a standard task in programming language theory: Embedding a small imperative
+language, defining its semantics, and reasoning about it.
 
 We won't have time to explain everything in complete detail, but we
 hope that the overview we provide is a good starting point for
@@ -39,6 +40,31 @@ To prepare for the tutorial, please do the following:
 4. Ensure that your editor is correctly connected to Lean by opening
    one of the files, introducing an error, and checking that there is
    feedback
+
+## Hands-on tasks
+
+The tutorial will be in live-coding presentation style, with breaks for hands-on experiences. Here
+are suggested tasks that you could try:
+
+### First hands-on break
+
+* Add unary operations (negation, logical not) to the expression language.
+
+* Let `Lean.Expr.optimize` apply rules like `0 + x = x`, `1 * x = x`.
+
+  Hints:
+
+  - It may be helpful to define a (non-recursive) function `Expr.optOp` with the same type as
+    `Expr.op`, that serves as a “smart constructor”. Pattern matching can be elegant here!
+  - In general it is advisible to write a separate theorem about each involved function
+    (`BinOp.apply`, `Expr.optOp`, `Expr.optimize`) separately than to do it all in one go. 
+    If these theorems are set up just right, they are good `@[simp]` lemmas, and will make the
+    subsequent proof easy.
+
+### First hands-on break
+
+**TODO**
+
 
 ## Code Structure
 
@@ -64,6 +90,10 @@ To prepare for the tutorial, please do the following:
 
 ## Acknowledgments
 
-This content is based on a tutorial presented at
-[SSFT24](https://fm.csl.sri.com/SSFT24/) by David Thrane Christiansen,
-co-developed with Leonardo de Moura.
+This conent is based on [material written by David Thrane
+Christiansen](https://github.com/david-christiansen/lean-fkbh-24-2) for the tutorial "Lean for the
+Functional Programmer", presented at *Mødegruppen for F#unktionelle Københavnere* by David Thrane
+Christiansen on 2024-08-27 and 2024-09-24.
+
+This material itself is based on a tutorial presented at [SSFT24](https://fm.csl.sri.com/SSFT24/) by
+David Thrane Christiansen, co-developed with Leonardo de Moura.
