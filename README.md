@@ -5,11 +5,6 @@
 This is the accompanying code for the invited lean tutorial held at [VSTTE
 2024](https://www.soundandcomplete.org/vstte2024.html) by Sebastian Ullrich and Joachim Breitner.
 
-It is based on [material written by David Thrane
-Christiansen](https://github.com/david-christiansen/lean-fkbh-24-2) for the tutorial "Lean for the
-Functional Programmer", presented at *Mødegruppen for F#unktionelle Københavnere* by David Thrane
-Christiansen on 2024-08-27 and 2024-09-24.
-
 ## Overview
 
 In this tutorial we will see the following features of Lean
@@ -90,7 +85,7 @@ are suggested tasks that you could try:
 
 ## Acknowledgments
 
-This conent is based on [material written by David Thrane
+This content is based on [material written by David Thrane
 Christiansen](https://github.com/david-christiansen/lean-fkbh-24-2) for the tutorial "Lean for the
 Functional Programmer", presented at *Mødegruppen for F#unktionelle Københavnere* by David Thrane
 Christiansen on 2024-08-27 and 2024-09-24.
