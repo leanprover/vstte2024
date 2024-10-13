@@ -78,3 +78,14 @@ Optimization doesn't change the meaning of any expression
 -/
 theorem optimize_ok' (e : Expr) : e.eval σ = e.optimize.eval σ := by
   induction e using optimize.induct <;> simp [optimize, eval, *]
+
+/-- Optimization is idempotent -/
+theorem optimize_idem (e : Expr) : e.optimize.optimize = e.optimize := by
+  induction e with
+  | op =>
+    simp only [optimize, opOpt]
+    split <;> (try split) <;> simp [optimize, opOpt, *]
+  | unop =>
+    simp only [optimize, unopOpt]
+    split <;> (try split) <;> simp [optimize, unopOpt, *]
+  | _ => simp [optimize]
