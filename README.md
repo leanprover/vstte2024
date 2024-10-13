@@ -11,7 +11,7 @@ In this tutorial we will see the following features of Lean
 
 * basic functional programming
 * extensible custom syntax for domain-specific functions
-* inductive predicates and proofs 
+* inductive predicates and proofs
 
 The example use-case is a standard task in programming language theory: Embedding a small imperative
 language, defining its semantics, and reasoning about it.
@@ -49,16 +49,18 @@ The branch `exercises` contains the result of solving all the exercises.
 
 * Add unary operations (negation, logical not) to the expression language.
 
-* Let `Lean.Expr.optimize` apply rules like `0 + x = x`, `1 * x = x`.
+* Let `Expr.optimize` apply rules like `0 + x = x`, `1 * x = x`.
 
   Hints:
 
   - It may be helpful to define a (non-recursive) function `Expr.optOp` with the same type as
     `Expr.op`, that serves as a “smart constructor”. Pattern matching can be elegant here!
   - In general it is advisible to write a separate theorem about each involved function
-    (`BinOp.apply`, `Expr.optOp`, `Expr.optimize`) separately than to do it all in one go. 
+    (`BinOp.apply`, `Expr.optOp`, `Expr.optimize`) separately than to do it all in one go.
     If these theorems are set up just right, they are good `@[simp]` lemmas, and will make the
     subsequent proof easy.
+
+* Prove that `Expr.optimize` is idempotent: `(e : Expr) : e.optimize.optimize = e.optimize`.
 
 * Write a function `Expr.hasDiv : Expr → Bool` that checks if division is used in the expression.
 
@@ -72,7 +74,7 @@ The branch `exercises` contains the result of solving all the exercises.
   Food for thought: How does this task relate to the previous task and the optimization `0 * x = 0`?
   If you have done both tasks, can you combine them?
 
-  
+
 ### Second hands-on break
 
 * Add nice input syntax for `Env.get σ "x"` and `Env.set`, e.g. `σ[[x]]` and `σ[[x := e]]` and
@@ -100,11 +102,11 @@ The branch `exercises` contains the result of solving all the exercises.
   def loop := imp {while (1) {skip;}}
   theorem infinite_loop : ¬ BigStep σ loop σ' := by
   ```
-  
+
   Hint:
 
   Rephrase the statement so that the three arguments to `BigStep` are variables, so that `induction` works. You can do that using a helper theorem that you finally apply, or explore the `generalize` tactic.
- 
+
 ## Code Structure
 
  - `Imp/Expr.lean` re-exports the expression language:
