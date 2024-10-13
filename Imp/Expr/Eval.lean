@@ -75,3 +75,58 @@ def Expr.eval (σ : Env) : Expr → Option Value
     let v1 ← e1.eval σ
     let v2 ← e2.eval σ
     bop.apply v1 v2
+
+/-- Whether an expression contains the div operator (and thus could fail) -/
+def Expr.hasNoDiv : Expr → Bool
+  | .const _ => true
+  | .var _ => true
+  | .unop _ e => e.hasNoDiv
+  | .op .div _ _ => false
+  | .op _ e1 e2 => e1.hasNoDiv && e2.hasNoDiv
+
+inductive Expr.HasNoDiv : Expr → Prop where
+  | const : Expr.HasNoDiv (.const i)
+  | var : Expr.HasNoDiv (.var i)
+  | unop : HasNoDiv e → Expr.HasNoDiv (.unop uop e)
+  | bop : HasNoDiv e1 → HasNoDiv e2 → bop ≠ .div → Expr.HasNoDiv (.op bop e1 e2)
+
+theorem Option.bind_isSome_of_isSome_of_forall_isSome {f : α → Option β}
+    (h1 : o.isSome) (h2 : ∀ x, (f x).isSome) : (Option.bind o f).isSome := by
+  cases o
+  · contradiction
+  · simp [*]
+
+@[simp]
+theorem UnOp.apply_isSome (uop : UnOp) (v : Value) : (uop.apply v).isSome := by
+  unfold UnOp.apply
+  split <;> simp [*]
+
+@[simp]
+theorem BinOp.apply_isSome (bop : BinOp) (v₁ v₂ : Value) (h : bop ≠ .div) : (bop.apply v₁ v₂).isSome := by
+  unfold BinOp.apply
+  split <;> simp [*]
+  contradiction
+
+theorem Expr.eval_isSome_of_hasDiv (e : Expr) (h : e.hasNoDiv) : (e.eval σ).isSome := by
+  induction e using hasNoDiv.induct
+  case case1 => simp [eval]
+  case case2 => simp [eval]
+  case case3 =>
+    simp [hasNoDiv] at h
+    simp [eval]
+    apply Option.bind_isSome_of_isSome_of_forall_isSome
+    · simp [*]
+    · simp [*]
+  case case4 =>
+    simp [hasNoDiv] at h
+  case case5 bop _ _ h_not_div _ _ =>
+    simp [hasNoDiv, *] at h
+    have : bop ≠ .div := by cases bop <;> trivial
+    obtain ⟨h₁ , h₂⟩ := h
+    simp [eval]
+    apply Option.bind_isSome_of_isSome_of_forall_isSome
+    · simp [*]
+    · intro v
+      apply Option.bind_isSome_of_isSome_of_forall_isSome
+      · simp [*]
+      · simp [*]
