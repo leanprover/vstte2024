@@ -40,6 +40,12 @@ syntax varname : exp
 /-- Numeric constant -/
 syntax num : exp
 
+/-- Arithmetic complement -/
+syntax:75 "-" exp:75 : exp
+
+/-- Boolean negation -/
+syntax:75 "!" exp:75 : exp
+
 /-- Multiplication -/
 syntax:70 exp:70 " * " exp:71 : exp
 /-- Division -/
@@ -89,6 +95,9 @@ open Lean in
 macro_rules
   | `(expr{$x:ident}) => `(Expr.var $(quote x.getId.toString))
   | `(expr{$n:num}) => `(Expr.const $(quote n.getNat))
+
+  | `(expr{-$e}) => `(Expr.unop .neg (expr{$e}))
+  | `(expr{!$e}) => `(Expr.unop .not (expr{$e}))
 
   | `(expr{$e1 + $e2}) => `(Expr.op .plus (expr{$e1}) (expr{$e2}))
   | `(expr{$e1 * $e2}) => `(Expr.op .times (expr{$e1}) (expr{$e2}))

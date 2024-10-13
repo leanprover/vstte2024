@@ -45,6 +45,12 @@ partial def delabExprInner : DelabM (TSyntax `exp) := do
     | Expr.var _ => do
       let x ← withAppArg delabNameInner
       `(exp|$x:varname)
+    | Expr.unop uop _ =>
+      let s ← withAppArg delabExprInner
+      match_expr uop with
+       | UnOp.neg => `(exp|-$s)
+       | UnOp.not => `(exp|!$s)
+       | _ => `(exp| ~(Expr.un $(← withAppFn <| withAppArg delab) $(← withAppArg delab)))
     | Expr.op op _ _ =>
       let s1 ← withAppFn <| withAppArg delabExprInner
       let s2 ← withAppArg delabExprInner
@@ -67,12 +73,13 @@ partial def delabExprInner : DelabM (TSyntax `exp) := do
       `(exp| ~$(← delab))
   annAsTerm stx
 
-@[delab app.Imp.Expr.const, delab app.Imp.Expr.var, delab app.Imp.Expr.op]
+@[delab app.Imp.Expr.const, delab app.Imp.Expr.var, delab app.Imp.Expr.op, delab app.Imp.Expr.unop]
 partial def delabExpr : Delab := do
   -- This delaborator only understands a certain arity - give up if it's incorrect
   guard <| match_expr ← getExpr with
     | Expr.const _ => true
     | Expr.var _ => true
+    | Expr.unop _ _ => true
     | Expr.op _ _ _ => true
     | _ => false
   match ← delabExprInner with
@@ -109,3 +116,7 @@ expr { ~x * ~x } : Expr
 /-- info: expr { x + y * z } : Expr -/
 #guard_msgs in
 #check expr { x + y * z }
+
+/-- info: expr { -(x + !y) } : Expr -/
+#guard_msgs in
+#check expr { - (x + !y) }

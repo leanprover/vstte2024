@@ -1,5 +1,10 @@
 namespace Imp
 
+/-- Unary operators -/
+inductive UnOp where
+  | neg | not
+deriving Repr, DecidableEq
+
 /-- Binary operators -/
 inductive BinOp where
   | plus | minus | times | div
@@ -13,6 +18,7 @@ deriving Repr, DecidableEq
 inductive Expr where
   | const (i : BitVec 32)
   | var (name : String)
+  | unop (uop : UnOp) (e1 : Expr)
   | op (op : BinOp) (e1 e2 : Expr)
 deriving Repr, DecidableEq
 
