@@ -22,15 +22,30 @@ def init (i : Value) : Env where
 def set (x : String) (v : Value) (σ : Env) : Env where
   get y := if x == y then v else σ.get y
 
-@[simp]
-theorem get_init : (Env.init v).get x = v := by rfl
+/-
+Using `syntax` and `macro_rules` as seen:
+
+syntax term noWs "[[" term "]]" : term
+syntax term noWs "[[" term " := " term "]]" : term
+macro_rules | `($e[[ $x ]]) => `(Env.get $e $x)
+macro_rules | `($e[[ $x := $v ]]) => `(Env.set $x $v $e)
+
+But we can also use `notation` which is a bit more limited, but automatically defines
+a delaboration, so we get pretty goals!
+-/
+
+notation σ "[[" x "]]" => Env.get σ x
+notation σ "[[" x " := " v "]]" => Env.set x v σ
 
 @[simp]
-theorem get_set_same {σ : Env} : (σ.set x v).get x = v := by
+theorem get_init : (Env.init v)[[x]] = v := by rfl
+
+@[simp]
+theorem get_set_same {σ : Env} : σ[[ x := v ]][[x]] = v := by
   simp [get, set]
 
 @[simp]
-theorem get_set_different {σ : Env} : x ≠ y → (σ.set x v).get y = σ.get y := by
+theorem get_set_different {σ : Env} : x ≠ y →  σ[[ x := v ]][[y]] = σ[[ y ]] := by
   intros
   simp [get, set, *]
 
@@ -67,7 +82,7 @@ Expressions that divide by zero don't have values - the result is undefined.
 -/
 def Expr.eval (σ : Env) : Expr → Option Value
   | .const i => i
-  | .var x => σ.get x
+  | .var x => σ[[x]]
   | .unop uop e => do
     let v ← e.eval σ
     uop.apply v
