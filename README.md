@@ -43,7 +43,9 @@ are suggested tasks that you could try:
 
 ### First hands-on break
 
-Suggested tasks, in rough order of difficulty.
+Suggested tasks, in rough order of difficulty. These are invitations to play around with Lean; unless you have prior experience with it or very similar tools like Isabelle or Coq, it is not likely to finisht them without help.
+
+The branch `exercises` contains the result of solving all the exercises.
 
 * Add unary operations (negation, logical not) to the expression language.
 
@@ -73,10 +75,13 @@ Suggested tasks, in rough order of difficulty.
   
 ### Second hands-on break
 
-* Add nice input syntax for `Env.get σ "x"` and `Env.set`, e.g. `σ[x]` and `σ[x := e]` and update
-  some of the proof statements.
+* Add nice input syntax for `Env.get σ "x"` and `Env.set`, e.g. `σ[[x]]` and `σ[[x := e]]` and
+  update some of the proof statements.
 
-* Add the optimization `x := x` to `Stmt.optimize`.
+  Instead of `syntax` and `macro_rules` you can also try to use the `notation` command as documented
+  at <https://lean-lang.org/lean4/doc/notation.html>; this will also make the new syntax show up in the InfoView (in other words, it will also delaborate).
+
+* Add the optimization that replaces `x := x` by `skip` to `Stmt.optimize`.
 
   Use `#guard_msgs` to check that it does what you want it to do on a small example.
 
