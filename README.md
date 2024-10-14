@@ -1,9 +1,9 @@
 # Lean tutorial
 
-**This material is still WIP.**
-
 This is the accompanying code for the invited lean tutorial held at [VSTTE
 2024](https://www.soundandcomplete.org/vstte2024.html) by Sebastian Ullrich and Joachim Breitner.
+
+[Introductory slides](https://docs.google.com/presentation/d/e/2PACX-1vRHeNJieYkbz4tWLce--Dm7GTRZvamSEMI1cmcPVEiJMphtDmaffJ7YENAOi6155ypt08DmifD7NYFK/pub?start=false&loop=false&delayms=3000)
 
 ## Overview
 
