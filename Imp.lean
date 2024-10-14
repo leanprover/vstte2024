@@ -10,18 +10,6 @@ namespace Imp.Stmt
 The final demo - read this file last!
 -/
 
-
-def popcountLoop : Stmt := imp {
-  i := 32;
-  count := 0;
-  while (i > 0) {
-    count := count + (x &&& 1);
-    i := i - 1;
-    x := x >>> 1;
-  }
-  x := count;
-}
-
 /--
 popcount implementation from Hacker's Delight, Second Edition, by Henry S. Warren, Jr.
 Figure 5-2 on p. 82.
@@ -49,13 +37,6 @@ where
 def test_popcount (x : BitVec 32) : Bool :=
   run (Env.init x) popcount 2024 |>.map (·.get "x" == pop_spec x) |>.getD false
 
-def test_popcountLoop (x : BitVec 32) : Bool :=
-  run (Env.init x) popcountLoop 33 |>.map (·.get "x" == pop_spec x) |>.getD false
-
-/-- info: true -/
-#guard_msgs in
-#eval test_popcount 1231123
-
 /-- info: true -/
 #guard_msgs in
 #eval test_popcount 0
@@ -68,20 +49,6 @@ def test_popcountLoop (x : BitVec 32) : Bool :=
 /-- info: true -/
 #guard_msgs in
 #eval test_popcount 129837
-
-
-set_option linter.unusedVariables false
-set_option debug.skipKernelTC true
-
-theorem popCountLoop_correct : test_popcountLoop x := by
-  have := @Env.set_set_sort "count" "i" (by decide)
-  have := @Env.set_set_sort "count" "x" (by decide)
-  have := @Env.set_set_sort "i" "x" (by decide)
-  simp [test_popcountLoop, popcountLoop]
-  simp [run, Expr.eval, BinOp.apply, *]
-  simp [pop_spec, pop_spec.go]
-
-
 
 
 theorem popCount_correct : test_popcount x := by

@@ -8,7 +8,6 @@ namespace Imp
 abbrev Value := BitVec 32
 
 /-- An environment maps variables names to their values (no pointers) -/
-@[ext]
 structure Env where
   get : String → Value
 deriving Inhabited
@@ -34,20 +33,6 @@ theorem get_set_same {σ : Env} : (σ.set x v).get x = v := by
 theorem get_set_different {σ : Env} : x ≠ y → (σ.set x v).get y = σ.get y := by
   intros
   simp [get, set, *]
-
-@[simp]
-theorem set_set_same {σ : Env} : (σ.set x v₁).set x v₂ = σ.set x v₂ := by
-  ext x : 2
-  simp [get, set]
-  split <;> rfl
-
-@[simp]
-theorem set_set_sort (h : x < y) : ∀ {σ : Env} v1 v2, (σ.set y v1).set x v2 = (σ.set x v2).set y v1 := by
-  intros
-  have : x ≠ y := by apply String.ne_of_lt <;> trivial
-  simp [set]
-  funext
-  repeat' split <;> simp_all
 
 end Env
 
