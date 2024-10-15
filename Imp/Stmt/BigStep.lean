@@ -120,7 +120,7 @@ theorem optimize_ok : BigStep σ s σ' → BigStep σ s.optimize σ' := by
       apply BigStep.seq ih1 ih2
   | assign h =>
     apply BigStep.assign
-    rw [← @Expr.optimize_ok']
+    rw [← Expr.optimize_ok']
     assumption
   | ifTrue heval hnn _ ih =>
     split
